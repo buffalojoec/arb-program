@@ -70,6 +70,7 @@ version = "0.1.0"
 dependencies = [
  "borsh",
  "borsh-derive",
+ "bytemuck",
  "solana-program",
  "spl-associated-token-account",
  "spl-token",
