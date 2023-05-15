@@ -24,7 +24,7 @@ use crate::error::ArbitrageProgramError;
 ///
 /// r = f(p) = (R * p) / (P + p)
 /// ```
-fn determine_swap_receive(
+pub(crate) fn determine_swap_receive(
     pool_recieve_balance: u64,
     receive_decimals: u8,
     pool_pay_balance: u64,
