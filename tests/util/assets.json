@@ -1,0 +1,103 @@
+{
+    "assets": [
+        {
+            "name": "Cannon",
+            "symbol": "CAN",
+            "description": "A cannon for defending yer ship!",
+            "uri": "https://arweave.net/ArreGQ6DYdIPGs_KiwVXE7AMVclLliICTlls6Ff8DbY",
+            "decimals": 3,
+            "quantity": 80,
+            "address": "Dww24FMp8YwEWsEAnNCGb353Wmy3zp5e9U1yipzHb8HY"
+        },
+        {
+            "name": "Cannon Ball",
+            "symbol": "CANB",
+            "description": "Cannon balls for yer cannons!",
+            "uri": "https://arweave.net/ZlxqEw-BVEO7LKLWE7uKJoCxC67w-0zaO9ydX-m6y7A",
+            "decimals": 9,
+            "quantity": 60,
+            "address": "45t3gzotgve6b8JKW6b4t2qGtHuatdkk8hY77iBCxXTt"
+        },
+        {
+            "name": "Compass",
+            "symbol": "COMP",
+            "description": "A compass to navigate the seven seas!",
+            "uri": "https://arweave.net/MvWxgCu231-0IrE3FWoaAYoFaD1MgWKOqDjCv5v6LEA",
+            "decimals": 3,
+            "quantity": 20,
+            "address": "Fsx1DQtEMHHZqFRU1Zov4sfXBsYzzQy2b3yvtAtAhmwX"
+        },
+        {
+            "name": "Fishing Net",
+            "symbol": "FISH",
+            "description": "A fishing net for catching meals for the crew!",
+            "uri": "https://arweave.net/2wCk8mVH8KyqwbYLlxae9kBBKb4jTRPeiXVrqUTvjUE",
+            "decimals": 3,
+            "quantity": 50,
+            "address": "GqbqYKYSyazBqPwxFSGEb8X6bJkcYVXdmXbXpRtfkaL2"
+        },
+        {
+            "name": "Gold",
+            "symbol": "GOLD",
+            "description": "Ahh the finest gold in all of these waters!",
+            "uri": "https://arweave.net/46B9y63MXlLnprZLvrRjS_50yecOydiLbxTbieAREBk",
+            "decimals": 6,
+            "quantity": 500,
+            "address": "5UCmzyoajUqvoXSSS8PjgFY82uy77EK99xQEwo4rBASQ"
+        },
+        {
+            "name": "Grappling Hook",
+            "symbol": "GRAP",
+            "description": "A grappling hook for boarding other ships!",
+            "uri": "https://arweave.net/RT9sF6ENI__DQGYD74H4SdncsjLyeO1Rm3dRQ1T1Tz0",
+            "decimals": 3,
+            "quantity": 50,
+            "address": "6Tp9bWqhVaottKYuWz2Da4rsMacSPBP7y8pCkoTSPXqG"
+        },
+        {
+            "name": "Gunpowder",
+            "symbol": "GUNP",
+            "description": "Gunpowder for ye muskets!",
+            "uri": "https://arweave.net/eLqSxbbW7ATsQioluBZt9KG0YnU0jRoR_46g0EJU75Q",
+            "decimals": 9,
+            "quantity": 60,
+            "address": "E5YWwS8jyC67jXEYsX9pAE7GQPUVs7Kj7G2mQxTxZUHX"
+        },
+        {
+            "name": "Musket",
+            "symbol": "MUSK",
+            "description": "A musket for firing on enemies!",
+            "uri": "https://arweave.net/tKdMfImOkHEqo8xWulIv92MybdpkbnWjDJmazj3lTpU",
+            "decimals": 3,
+            "quantity": 60,
+            "address": "FXQGPeDnxe1mfvYM4kSATyf7iMbgoYYBoSMSMKnECkiu"
+        },
+        {
+            "name": "Rum",
+            "symbol": "RUM",
+            "description": "Rum, more rum!",
+            "uri": "https://arweave.net/NJGvUP2EuK-LJ7QV6qRifcGC8ao2Vd9WSW2GjiGSpVw",
+            "decimals": 6,
+            "quantity": 100,
+            "address": "GV7sz4n3cSaPixpvKXKSxfZrjemrBP3Kn71gPtiob2Pd"
+        },
+        {
+            "name": "Telescope",
+            "symbol": "TELE",
+            "description": "A telescope for spotting booty amongst the seas!",
+            "uri": "https://arweave.net/NmBFKuCWk4yfAB4a6EGwXlWM92q5B9nBZMlRhpVA4y4",
+            "decimals": 3,
+            "quantity": 20,
+            "address": "JAg3avQquUawT7kWYzgSiW6z2JumrogzseUYqz3TeZiE"
+        },
+        {
+            "name": "Treasure Map",
+            "symbol": "TMAP",
+            "description": "A map to help ye find long lost treasures!",
+            "uri": "https://arweave.net/_cM90jcVdRRYt-OA8xIV--gZCAOpe18BCLvV2TVW7Fc",
+            "decimals": 3,
+            "quantity": 10,
+            "address": "FvumDiBuvU7xhjpNxrLzvoUh3mECAFdaTizu2ffG2Wz1"
+        }
+    ]
+}
