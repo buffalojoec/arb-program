@@ -2,7 +2,6 @@
     "scripts": {
         "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
         "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-        "create-lookup-table": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-lookup-table.test.ts",
         "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/main.test.ts"
     },
     "dependencies": {

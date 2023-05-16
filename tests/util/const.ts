@@ -11,3 +11,8 @@ export const CONNECTION = new Connection('http://localhost:8899', 'confirmed')
 
 // Local keypair
 export const PAYER = loadKeypairFromFile(os.homedir + '/.config/solana/id.json')
+
+// Arbitrage program
+export const ARBITRAGE_PROGRAM = loadKeypairFromFile(
+    './target/deploy/arb_program-keypair.json'
+)

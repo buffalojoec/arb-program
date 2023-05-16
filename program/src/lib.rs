@@ -1,71 +1,57 @@
 //! Arbitrage bot between two swap programs!
 mod arb;
 mod error;
+mod partial_state;
+mod processor;
 mod swap;
 mod util;
 
-use arb::try_arbitrage;
 use borsh::{BorshDeserialize, BorshSerialize};
-use error::ArbitrageProgramError;
 use solana_program::{
-    account_info::{next_account_info, AccountInfo},
-    entrypoint,
-    entrypoint::ProgramResult,
+    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, program_error::ProgramError,
     pubkey::Pubkey,
 };
-use util::{check_pool_address, load_arbitrage_accounts};
 
-/// The two swap programs we want to consider arbitrage opportunities between
+/// The program's instructions
+/// This program only takes one instruction
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct ArbBotArgs {
-    pub swap_1_program_id: Pubkey,
-    pub swap_1_pool_address: Pubkey,
-    pub swap_2_program_id: Pubkey,
-    pub swap_2_pool_address: Pubkey,
+pub enum ArbitrageProgramInstruction {
+    TryArbitrage {
+        /// The program ID of the first swap we want to inspect for arbitrage
+        swap_1_program_id: Pubkey,
+        /// The program ID of the second swap we want to inspect for arbitrage
+        swap_2_program_id: Pubkey,
+        /// How many assets we are going to evaluate combinations of at one time
+        concurrency: u8,
+        /// How aggressive the model will be when identifying arbitrage
+        /// opportunities
+        ///
+        /// More specifically, a higher temperature will
+        /// mean a smaller percent difference in swap values will trigger a
+        /// trade
+        temperature: u8,
+    },
 }
 
 entrypoint!(process);
 
-/// Program's entrypoint (has only one instruction type)
-fn process(
-    _program_id: &Pubkey,
-    accounts: &[AccountInfo],
-    instruction_data: &[u8],
-) -> ProgramResult {
-    // Make sure the pool addresses match the provided program IDs
-    let args = ArbBotArgs::try_from_slice(instruction_data)?;
-    check_pool_address(args.swap_1_program_id, args.swap_1_pool_address)?;
-    check_pool_address(args.swap_2_program_id, args.swap_2_pool_address)?;
-
-    // Read in all of the accounts and aggregate them by type
-    let accounts_iter = &mut accounts.iter();
-    let payer = next_account_info(accounts_iter)?;
-    let token_program = next_account_info(accounts_iter)?;
-    let (token_accounts_user, token_accounts_swap_1, token_accounts_swap_2, mints) =
-        load_arbitrage_accounts(
-            accounts_iter,
-            payer.key,
-            &args.swap_1_pool_address,
-            &args.swap_2_pool_address,
-        )?;
-
-    // Ensure the vectors are the same length
-    let mints_len = mints.len();
-    if !(mints_len == token_accounts_user.len()
-        && mints_len == token_accounts_swap_1.len()
-        && mints_len == token_accounts_swap_2.len())
-    {
-        return Err(ArbitrageProgramError::InvalidAccountsList.into());
+/// Processor
+fn process(_program_id: &Pubkey, accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    match ArbitrageProgramInstruction::try_from_slice(data) {
+        Ok(ix) => match ix {
+            ArbitrageProgramInstruction::TryArbitrage {
+                swap_1_program_id,
+                swap_2_program_id,
+                concurrency,
+                temperature,
+            } => processor::process_arbitrage(
+                accounts,
+                &swap_1_program_id,
+                &swap_2_program_id,
+                concurrency,
+                temperature,
+            ),
+        },
+        Err(_) => Err(ProgramError::InvalidInstructionData),
     }
-
-    // Check if there is an arbitrage opportunity between the two pools, and
-    // execute the trade if there is one
-    try_arbitrage(
-        token_accounts_user,
-        token_accounts_swap_1,
-        token_accounts_swap_2,
-        mints,
-        payer,
-        token_program,
-    )
 }

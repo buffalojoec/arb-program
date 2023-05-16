@@ -14,6 +14,10 @@ pub enum ArbitrageProgramError {
     /// the balance of the pool's token account for the receive asset
     #[error("The amount proposed to pay resolves to a receive amount that is greater than the current liquidity")]
     InvalidSwapNotEnoughLiquidity,
+    /// No arbitrage opportunity was detected, so the program will return an
+    /// error so that preflight fails
+    #[error("No arbitrage opportunity detected")]
+    NoArbitrage,
 }
 
 impl From<ArbitrageProgramError> for solana_program::program_error::ProgramError {
@@ -45,6 +49,9 @@ impl solana_program::program_error::PrintProgramError for ArbitrageProgramError 
             }
             ArbitrageProgramError::InvalidSwapNotEnoughLiquidity => {
                 solana_program::msg!("The amount proposed to pay resolves to a receive amount that is greater than the current liquidity")
+            }
+            ArbitrageProgramError::NoArbitrage => {
+                solana_program::msg!("No arbitrage opportunity detected")
             }
         }
     }
