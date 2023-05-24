@@ -9,7 +9,7 @@ use crate::arb::{try_arbitrage, TryArbitrageArgs};
 use crate::partial_state::{PartialMintState, PartialTokenAccountState};
 use crate::util::check_pool_address;
 
-/// Processese program inputs to search for an arbitrage opportunity between two
+/// Processes program inputs to search for an arbitrage opportunity between two
 /// swap programs
 ///
 /// Note: accounts must be provided in a very specific order:

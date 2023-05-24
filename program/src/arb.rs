@@ -26,14 +26,6 @@ pub struct TryArbitrageArgs<'a, 'b> {
     pub temperature: u8,
 }
 
-/// Enum used to tell the algorithm which swap pool is a "buy"
-enum Buy {
-    /// Buy on Swap #1 and sell on Swap #2
-    Swap1,
-    /// Buy on Swap #2 and sell on Swap #1
-    Swap2,
-}
-
 /// Checks to see if there is an arbitrage opportunity between the two pools,
 /// and executes the trade if there is one
 pub fn try_arbitrage(args: TryArbitrageArgs<'_, '_>) -> ProgramResult {
@@ -133,6 +125,14 @@ pub fn try_arbitrage(args: TryArbitrageArgs<'_, '_>) -> ProgramResult {
         }
     }
     Err(ArbitrageProgramError::NoArbitrage.into())
+}
+
+/// Enum used to tell the algorithm which swap pool is a "buy"
+enum Buy {
+    /// Buy on Swap #1 and sell on Swap #2
+    Swap1,
+    /// Buy on Swap #2 and sell on Swap #1
+    Swap2,
 }
 
 /// Evaluates the percent difference in the calculated values for `r` and

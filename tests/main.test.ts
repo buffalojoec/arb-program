@@ -186,9 +186,7 @@ describe('Arbitrage Bot', async () => {
         )
         console.log(`Sending transaction with ${concurrencyVal} accounts...`)
         console.log(`Tx size with Lookup Table: ${tx.serialize().length}`)
-        await connection.sendTransaction(tx, {
-            skipPreflight: true,
-        })
+        await connection.sendTransaction(tx)
         await sleepSeconds(2)
     }
 
