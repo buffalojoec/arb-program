@@ -1,19 +1,19 @@
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import React, { useState } from 'react';
-import { useAutoConnect } from '@/contexts/AutoConnectProvider';
-import NavElement from '@/components/nav-element';
-import NetworkSwitcher from '@/components/NetworkSwitcher';
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import React, { useState } from 'react'
+import { useAutoConnect } from '@/contexts/AutoConnectProvider'
+import NavElement from '@/components/nav-element'
+import NetworkSwitcher from '@/components/NetworkSwitcher'
 
 const WalletMultiButtonDynamic = dynamic(
     async () =>
         (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
-    { ssr: false },
-);
+    { ssr: false }
+)
 
 export const AppBar: React.FC = () => {
-    const { autoConnect, setAutoConnect } = useAutoConnect();
-    const [isNavOpen, setIsNavOpen] = useState(false);
+    const { autoConnect, setAutoConnect } = useAutoConnect()
+    const [isNavOpen, setIsNavOpen] = useState(false)
     return (
         <div>
             {/* NavBar / Header */}
@@ -112,6 +112,13 @@ export const AppBar: React.FC = () => {
                     <WalletMultiButtonDynamic className="btn-ghost btn-sm relative flex md:hidden text-lg " />
                 </div>
 
+                <div>
+                    <h3 className="text-center text-xl font-semibold font-serif text-orange-500 text-opacity-80">
+                        There&apos;s arbitrage opportunities out there for the
+                        real scallywags...
+                    </h3>
+                </div>
+
                 {/* Nav Links */}
                 {/* Wallet & Settings */}
                 <div className="navbar-end">
@@ -193,7 +200,7 @@ export const AppBar: React.FC = () => {
                                         <input
                                             type="checkbox"
                                             checked={autoConnect}
-                                            onChange={e =>
+                                            onChange={(e) =>
                                                 setAutoConnect(e.target.checked)
                                             }
                                             className="toggle"
@@ -207,5 +214,5 @@ export const AppBar: React.FC = () => {
                 </div>
             </div>
         </div>
-    );
-};
+    )
+}
