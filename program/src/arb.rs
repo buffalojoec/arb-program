@@ -1,6 +1,6 @@
 //! Arbitrage opportunity spotting and trade placement
 use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, instruction::Instruction,
+    account_info::AccountInfo, entrypoint::ProgramResult, instruction::Instruction, msg,
     program::invoke, pubkey::Pubkey,
 };
 
@@ -19,16 +19,20 @@ pub struct TryArbitrageArgs<'a, 'b> {
     pub mints: Vec<ArbitrageMintInfo<'a, 'b>>,
     pub payer: &'a AccountInfo<'b>,
     pub token_program: &'a AccountInfo<'b>,
+    pub system_program: &'a AccountInfo<'b>,
+    pub associated_token_program: &'a AccountInfo<'b>,
+    pub swap_1_program: &'a AccountInfo<'b>,
+    pub swap_2_program: &'a AccountInfo<'b>,
     pub swap_1_pool: &'a AccountInfo<'b>,
     pub swap_2_pool: &'a AccountInfo<'b>,
-    pub swap_1_program_id: &'a Pubkey,
-    pub swap_2_program_id: &'a Pubkey,
     pub temperature: u8,
 }
 
 /// Checks to see if there is an arbitrage opportunity between the two pools,
 /// and executes the trade if there is one
 pub fn try_arbitrage(args: TryArbitrageArgs<'_, '_>) -> ProgramResult {
+    msg!("Swap #1 Pool: {}", args.swap_1_pool.key);
+    msg!("Swap #2 Pool: {}", args.swap_2_pool.key);
     let mints_len = args.mints.len();
     for i in 0..mints_len {
         // Load each token account and the mint for the asset we want to drive arbitrage
@@ -50,76 +54,94 @@ pub fn try_arbitrage(args: TryArbitrageArgs<'_, '_>) -> ProgramResult {
                 determine_swap_receive(swap_1_j.3, mint_j.1, swap_1_i.3, mint_i.1, user_i.3)?;
             let r_swap_2 =
                 determine_swap_receive(swap_2_j.3, mint_j.1, swap_2_i.3, mint_i.1, user_i.3)?;
+            if r_swap_1 == 0 || r_swap_1 > swap_1_j.3 || r_swap_2 == 0 || r_swap_2 > swap_2_j.3 {
+                continue;
+            }
             // Evaluate the arbitrage check
             if let Some(trade) = check_for_arbitrage(r_swap_1, r_swap_2, args.temperature) {
                 // If we have a trade, place it
+                msg!("PLACING TRADE!");
                 return match trade {
                     // Buy on Swap #1 and sell on Swap #2
-                    Buy::Swap1 => invoke_arbitrage(
-                        (
-                            *args.swap_1_program_id,
-                            &[
-                                args.swap_1_pool.to_owned(),
-                                mint_j.0.to_owned(),
-                                swap_1_j.0.to_owned(),
-                                user_j.0.to_owned(),
-                                mint_i.0.to_owned(),
-                                swap_1_i.0.to_owned(),
-                                user_i.0.to_owned(),
-                                args.payer.to_owned(),
-                                args.token_program.to_owned(),
-                            ],
-                            user_i.3,
-                        ),
-                        (
-                            *args.swap_2_program_id,
-                            &[
-                                args.swap_2_pool.to_owned(),
-                                mint_i.0.to_owned(),
-                                swap_2_i.0.to_owned(),
-                                user_i.0.to_owned(),
-                                mint_j.0.to_owned(),
-                                swap_1_j.0.to_owned(),
-                                user_j.0.to_owned(),
-                                args.payer.to_owned(),
-                                args.token_program.to_owned(),
-                            ],
-                            r_swap_1,
-                        ),
-                    ),
+                    Buy::Swap1 => {
+                        msg!("Buy on Swap #1 and sell on Swap #2");
+                        invoke_arbitrage(
+                            (
+                                *args.swap_1_program.key,
+                                &[
+                                    args.swap_1_pool.to_owned(),
+                                    mint_j.0.to_owned(),
+                                    swap_1_j.0.to_owned(),
+                                    user_j.0.to_owned(),
+                                    mint_i.0.to_owned(),
+                                    swap_1_i.0.to_owned(),
+                                    user_i.0.to_owned(),
+                                    args.payer.to_owned(),
+                                    args.token_program.to_owned(),
+                                    args.system_program.to_owned(),
+                                    args.associated_token_program.to_owned(),
+                                ],
+                                user_i.3,
+                            ),
+                            (
+                                *args.swap_2_program.key,
+                                &[
+                                    args.swap_2_pool.to_owned(),
+                                    mint_i.0.to_owned(),
+                                    swap_2_i.0.to_owned(),
+                                    user_i.0.to_owned(),
+                                    mint_j.0.to_owned(),
+                                    swap_2_j.0.to_owned(),
+                                    user_j.0.to_owned(),
+                                    args.payer.to_owned(),
+                                    args.token_program.to_owned(),
+                                    args.system_program.to_owned(),
+                                    args.associated_token_program.to_owned(),
+                                ],
+                                r_swap_1,
+                            ),
+                        )
+                    }
                     // Buy on Swap #2 and sell on Swap #1
-                    Buy::Swap2 => invoke_arbitrage(
-                        (
-                            *args.swap_2_program_id,
-                            &[
-                                args.swap_2_pool.to_owned(),
-                                mint_j.0.to_owned(),
-                                swap_1_j.0.to_owned(),
-                                user_j.0.to_owned(),
-                                mint_i.0.to_owned(),
-                                swap_1_i.0.to_owned(),
-                                user_i.0.to_owned(),
-                                args.payer.to_owned(),
-                                args.token_program.to_owned(),
-                            ],
-                            r_swap_2,
-                        ),
-                        (
-                            *args.swap_1_program_id,
-                            &[
-                                args.swap_1_pool.to_owned(),
-                                mint_i.0.to_owned(),
-                                swap_1_i.0.to_owned(),
-                                user_i.0.to_owned(),
-                                mint_j.0.to_owned(),
-                                swap_1_j.0.to_owned(),
-                                user_j.0.to_owned(),
-                                args.payer.to_owned(),
-                                args.token_program.to_owned(),
-                            ],
-                            user_j.3,
-                        ),
-                    ),
+                    Buy::Swap2 => {
+                        msg!("Buy on Swap #2 and sell on Swap #1");
+                        invoke_arbitrage(
+                            (
+                                *args.swap_2_program.key,
+                                &[
+                                    args.swap_2_pool.to_owned(),
+                                    mint_j.0.to_owned(),
+                                    swap_2_j.0.to_owned(),
+                                    user_j.0.to_owned(),
+                                    mint_i.0.to_owned(),
+                                    swap_2_i.0.to_owned(),
+                                    user_i.0.to_owned(),
+                                    args.payer.to_owned(),
+                                    args.token_program.to_owned(),
+                                    args.system_program.to_owned(),
+                                    args.associated_token_program.to_owned(),
+                                ],
+                                r_swap_2,
+                            ),
+                            (
+                                *args.swap_1_program.key,
+                                &[
+                                    args.swap_1_pool.to_owned(),
+                                    mint_i.0.to_owned(),
+                                    swap_1_i.0.to_owned(),
+                                    user_i.0.to_owned(),
+                                    mint_j.0.to_owned(),
+                                    swap_1_j.0.to_owned(),
+                                    user_j.0.to_owned(),
+                                    args.payer.to_owned(),
+                                    args.token_program.to_owned(),
+                                    args.system_program.to_owned(),
+                                    args.associated_token_program.to_owned(),
+                                ],
+                                user_j.3,
+                            ),
+                        )
+                    }
                 };
             }
         }
@@ -165,17 +187,38 @@ fn invoke_arbitrage(
     buy: (Pubkey, &[AccountInfo], u64),
     sell: (Pubkey, &[AccountInfo], u64),
 ) -> ProgramResult {
+    let (buy_swap_ix_data, sell_swap_ix_data) = build_ix_datas(buy.2, sell.2);
     let ix_buy = Instruction::new_with_borsh(
         buy.0,
-        &buy.2,
+        &buy_swap_ix_data,
         buy.1.iter().map(ToAccountMeta::to_account_meta).collect(),
     );
     let ix_sell = Instruction::new_with_borsh(
         sell.0,
-        &sell.2,
+        &sell_swap_ix_data,
         sell.1.iter().map(ToAccountMeta::to_account_meta).collect(),
     );
+    msg!("Executing buy ...");
     invoke(&ix_buy, buy.1)?;
+    msg!("Executing sell ...");
     invoke(&ix_sell, sell.1)?;
     Ok(())
+}
+
+/// Used to build the instruction data for the `swap` instruction
+/// on each swap program
+fn build_ix_datas(buy_amount: u64, sell_amount: u64) -> ([u8; 16], [u8; 16]) {
+    // Initialize both datas
+    let mut buy_swap_ix_data = [0u8; 16];
+    let mut sell_swap_ix_data = [0u8; 16];
+    // Lay out the configs
+    let swap_ix_hash = solana_program::hash::hash(b"global:swap");
+    let buy_amount_as_bytes: [u8; 8] = buy_amount.to_le_bytes();
+    let sell_amount_as_bytes: [u8; 8] = sell_amount.to_le_bytes();
+    // Copy in the bytes
+    buy_swap_ix_data[..8].copy_from_slice(&swap_ix_hash.to_bytes()[..8]);
+    buy_swap_ix_data[8..].copy_from_slice(&buy_amount_as_bytes);
+    sell_swap_ix_data[..8].copy_from_slice(&swap_ix_hash.to_bytes()[..8]);
+    sell_swap_ix_data[8..].copy_from_slice(&sell_amount_as_bytes);
+    (buy_swap_ix_data, sell_swap_ix_data)
 }

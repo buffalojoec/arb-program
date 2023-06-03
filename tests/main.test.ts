@@ -4,13 +4,14 @@ import {
     TokenAccountNotFoundError,
     createAccount as createTokenAccount,
 } from '@solana/spl-token'
-import { PublicKey } from '@solana/web3.js'
+import { PublicKey, SendTransactionError } from '@solana/web3.js'
 import { sleepSeconds } from './util'
 import assetsConfig from './util/assets.json'
 import { ARBITRAGE_PROGRAM, CONNECTION, PAYER } from './util/const'
 import { createArbitrageInstruction, getPoolAddress } from './util/instruction'
 import { mintExistingTokens } from './util/token'
 import {
+    buildTransactionV0,
     buildTransactionV0WithLookupTable,
     createAddressLookupTable,
     extendAddressLookupTable,
@@ -20,18 +21,18 @@ import { before, describe, it } from 'mocha'
 
 // Swap programs to arbitrage trade
 const SWAP_PROGRAM_1 = new PublicKey(
-    'CvjHwneiRy7FdLV9aEVPGuhBMi6w9nZit6PbjGQns3oN'
+    '5koF84vG5xwah17PNRyge3HmqdJZ4rqdqPvZnMKqi8Bq'
 )
 const SWAP_PROGRAM_2 = new PublicKey(
-    'Hx1kdUBmEHP4tHXpeNahLSv6Y6pX82ZMLUsEW6Rv5cpj'
+    'DRP4K7yv8EBftb3roP81idoPtRDJwpak1Apw8d4Df14T'
 )
 
 // Temperature `t`: How aggressive should the model be? 0..99
-const temperature = 80
+const temperature = 60
 // Concurrency `n`: Try `n` assets at a time
-const concurrency = 10
+const concurrency = 3
 // Iterations `i`: Check all asset pairings `i` times
-const iterations = 1
+const iterations = 2
 
 /**
  * Test the Arbitrage Program
@@ -184,9 +185,35 @@ describe('Arbitrage Bot', async () => {
             [payer],
             lookupTable
         )
+        const txNoLT = await buildTransactionV0(
+            connection,
+            [ix],
+            payer.publicKey,
+            [payer]
+        )
         console.log(`Sending transaction with ${concurrencyVal} accounts...`)
-        console.log(`Tx size with Lookup Table: ${tx.serialize().length}`)
-        await connection.sendTransaction(tx)
+        console.log(`Tx size with Lookup Table      : ${tx.serialize().length}`)
+        console.log(
+            `Tx size WITHOUT Lookup Table   : ${txNoLT.serialize().length}`
+        )
+        try {
+            await connection.sendTransaction(tx)
+            console.log('====================================')
+            console.log('   Arbitrage trade placed!')
+            console.log('====================================')
+        } catch (error) {
+            if (error instanceof SendTransactionError) {
+                if (error.message.includes('custom program error: 0x3')) {
+                    console.log('====================================')
+                    console.log('   No arbitrage opportunity found')
+                    console.log('====================================')
+                } else {
+                    throw error
+                }
+            } else {
+                throw error
+            }
+        }
         await sleepSeconds(2)
     }
 

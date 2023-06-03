@@ -7,7 +7,10 @@ import {
     SYSVAR_RENT_PUBKEY,
     TransactionInstruction,
 } from '@solana/web3.js'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import {
+    TOKEN_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+} from '@solana/spl-token'
 
 /**
  * Get the PDA of the Liquidity Pool for a program
@@ -115,6 +118,18 @@ export function createArbitrageInstruction(
         { pubkey: payer, isSigner: true, isWritable: true },
         // Token Program
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+        // System Program
+        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        // Associated Token Program
+        {
+            pubkey: ASSOCIATED_TOKEN_PROGRAM_ID,
+            isSigner: false,
+            isWritable: false,
+        },
+        // Swap #1 Program
+        { pubkey: swapProgram1, isSigner: false, isWritable: false },
+        // Swap #2 Program
+        { pubkey: swapProgram2, isSigner: false, isWritable: false },
         // Liquidity Pool for Swap #1
         defaultAccountMeta(swapPool1),
         // Liquidity Pool for Swap #2
@@ -128,6 +143,7 @@ export function createArbitrageInstruction(
     tokenAccountsSwap2.forEach((a) => keys.push(defaultAccountMeta(a)))
     // [Mint Accounts]
     mints.forEach((a) => keys.push(defaultAccountMeta(a)))
+
     return new TransactionInstruction({
         keys,
         programId,

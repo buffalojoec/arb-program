@@ -32,6 +32,10 @@ pub fn process_arbitrage(
     let accounts_iter = &mut accounts.iter();
     let payer = next_account_info(accounts_iter)?;
     let token_program = next_account_info(accounts_iter)?;
+    let system_program = next_account_info(accounts_iter)?;
+    let associated_token_program = next_account_info(accounts_iter)?;
+    let swap_1_program = next_account_info(accounts_iter)?;
+    let swap_2_program = next_account_info(accounts_iter)?;
     let swap_1_pool = next_account_info(accounts_iter)?;
     let swap_2_pool = next_account_info(accounts_iter)?;
 
@@ -77,7 +81,6 @@ pub fn process_arbitrage(
     };
 
     // Read the provided mint accounts for the assets to evaluate all combinations
-    // of
     let mints = {
         let mut accts = vec![];
         for _x in 0..concurrency {
@@ -97,10 +100,12 @@ pub fn process_arbitrage(
         mints,
         payer,
         token_program,
+        system_program,
+        associated_token_program,
+        swap_1_program,
+        swap_2_program,
         swap_1_pool,
         swap_2_pool,
-        swap_1_program_id,
-        swap_2_program_id,
         temperature,
     })
 }
