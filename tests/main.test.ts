@@ -30,7 +30,7 @@ const SWAP_PROGRAM_2 = new PublicKey(
 // Temperature `t`: How aggressive should the model be? 0..99
 const temperature = 60
 // Concurrency `n`: Try `n` assets at a time
-const concurrency = 3
+const concurrency = 8
 // Iterations `i`: Check all asset pairings `i` times
 const iterations = 2
 
@@ -185,19 +185,19 @@ describe('Arbitrage Bot', async () => {
             [payer],
             lookupTable
         )
-        const txNoLT = await buildTransactionV0(
-            connection,
-            [ix],
-            payer.publicKey,
-            [payer]
-        )
+        // const txNoLT = await buildTransactionV0(
+        //     connection,
+        //     [ix],
+        //     payer.publicKey,
+        //     [payer]
+        // )
         console.log(`Sending transaction with ${concurrencyVal} accounts...`)
         console.log(`Tx size with Lookup Table      : ${tx.serialize().length}`)
-        console.log(
-            `Tx size WITHOUT Lookup Table   : ${txNoLT.serialize().length}`
-        )
+        // console.log(
+        //     `Tx size WITHOUT Lookup Table   : ${txNoLT.serialize().length}`
+        // )
         try {
-            await connection.sendTransaction(tx)
+            await connection.sendTransaction(tx, { skipPreflight: true })
             console.log('====================================')
             console.log('   Arbitrage trade placed!')
             console.log('====================================')
